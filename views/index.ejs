@@ -14,8 +14,11 @@
       <label for="segmentUrl">URL to HLS segment:</label>
       <input type="text" id="segmentUrl" size="80">
       <input type="button" value="Analyze" onclick="analyze()">
-      <pre id="nalUnits">
-      </pre>
+      <div id="info" style="visibility: hidden">
+        <table id="infoPrograms" class="table table-responsive">
+        </table>
+        <pre id="nalUnits"></pre>
+      </div>
     </div>
   </body>
 </html>

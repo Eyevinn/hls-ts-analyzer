@@ -10,9 +10,8 @@ function analyze() {
       var data = new Uint8Array(buffer);
       parser.parse(data).then(function() {
         var avcParser = parser.createAvcParser(parser.getDataStreamByProgramType("avc"));
-        var nalUnits = avcParser.getNalUnits();
-        printNU(avcParser, nalUnits);
-        //plotAvc(nalUnits);
+        var programs = parser.getPrograms();
+        printInfo(programs, avcParser);
       });
     }
   };
@@ -20,7 +19,30 @@ function analyze() {
   xhr.send();
 }
 
-function printNU(parser, nalUnits) {
+function printInfo(programs, avcParser) {
+  var infoElem = document.getElementById("info");
+  infoElem.style.visibility = "visible";
+  var infoPrograms = document.getElementById("infoPrograms");
+  infoPrograms.innerHTML = '<thead class="thead"><tr><th>PID</th><th>TYPE</th><th>PACKETS</th></tr></thead>';
+
+  programs.forEach(function(p) {
+    var row = document.createElement("tr");
+    var pid = document.createElement("td");
+    pid.innerHTML = p.id;
+    row.appendChild(pid);
+    var type = document.createElement("td");
+    type.innerHTML = p.type;
+    row.appendChild(type);
+    var packets = document.createElement("td");
+    packets.innerHTML = p.packets;
+    row.appendChild(packets);
+    infoPrograms.appendChild(row);    
+  });
+  printNU(avcParser);
+}
+
+function printNU(avcParser) {
+  var nalUnits = avcParser.getNalUnits();
   var elem = document.getElementById("nalUnits");
   elem.innerHTML = "";
 
@@ -35,26 +57,7 @@ function printNU(parser, nalUnits) {
       if (nu.pes) {
         pts = nu.pes.pts - firstPts;
       }
-      elem.innerHTML += "PTS:"+ pts + " " + parser.nalUnitType(nu.type) + " (" + nu.data.length + " bytes)\n";
+      elem.innerHTML += "PTS:"+ pts + " " + avcParser.nalUnitType(nu.type) + " (" + nu.data.length + " bytes)\n";
     });
-  }
-}
-
-var XOFFSET = 60;
-var WIDTH = 1400;
-
-function plotAvc(nalUnits) {
-  var elem = document.getElementById("avc");
-  var w = WIDTH / nalUnits.length;
-  for (var i = 0; i < nalUnits.length; i++) {
-    var item = document.createElement("li");
-    var type = nalUnits[i].type;
-    var size = 200;
-    item.innerHTML = type;
-    item.style.height = size + "px";
-    item.style.top = (500 - size) + "px";
-    item.style.left = XOFFSET + (i * 10 + 1) + "px";
-    item.style.visibility = "visible";
-    elem.appendChild(item);
   }
 }

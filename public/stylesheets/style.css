@@ -1,19 +1,11 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-image: url('../images/bg-light.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 a {
   color: #00B7FF;
-}
-
-#avc li {
-  position:absolute;	
-  list-style:none;
-  background:lightblue;
-  width:10px;
-  text-align:center;
-  border:1px solid black;
-  visibility: hidden;
-  font-size: 8px;
 }
