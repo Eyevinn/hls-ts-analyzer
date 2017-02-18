@@ -38,11 +38,80 @@ function printInfo(programs, avcParser) {
     row.appendChild(packets);
     infoPrograms.appendChild(row);    
   });
-  printNU(avcParser);
+  var nalUnits = avcParser.getNalUnits().filter(function(nu) {
+    return (avcParser.nalUnitCategory(nu.type) === "VCL");
+  });
+  plotNUs(avcParser, nalUnits);
+  printNUs(avcParser, avcParser.getNalUnits());
 }
 
-function printNU(avcParser) {
-  var nalUnits = avcParser.getNalUnits();
+function widthFromType(type, uw) {
+  if (type === 5) {
+    return uw * 2;
+  }
+  return uw;
+}
+
+function colorFromType(type) {
+  if (type === 5) {
+    return "rgb(244, 100, 100)";
+  }
+  return "rgb(190, 190, 190)";
+}
+
+function plotNUs(avcParser, nalUnits) {
+  var elem = document.getElementById("plotNalUnits");
+
+  if (nalUnits.length > 0) {
+    var units = document.createElement("div");
+    units.id = "units";
+    elem.appendChild(units);
+    
+    var x = 100
+    var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    var uw = (w - 400) / nalUnits.length;
+
+    nalUnits.forEach(function(nu) {
+      var li = document.createElement("li");
+      li.style.height = "90px";
+      li.style.left = x + "px";
+      li.style.width = widthFromType(nu.type, uw) + "px";
+      li.style.backgroundColor = colorFromType(nu.type);
+      x += widthFromType(nu.type, uw) + 1;
+      units.appendChild(li);
+    });
+
+    var pts = document.createElement("div");
+    pts.id = "pts";
+    elem.appendChild(pts);
+
+    x = 100
+    var firstPts = nalUnits[0].pes.pts;
+    var lastPts = 0;
+
+    nalUnits.forEach(function(nu) {
+      if (nu.type === 5) {
+        var li = document.createElement("li");
+        li.style.left = x + "px";
+        li.style.top = "390px";
+        li.innerHTML = ((nu.pes.pts - firstPts) / 90000) * 1000 + " ms";
+        pts.appendChild(li);
+      }
+      if (nu.pes && nu.pes.pts && nu.pes.pts > lastPts) {
+        lastPts = nu.pes.pts;
+      }
+      x += widthFromType(nu.type, uw) + 1;
+    });
+    var li = document.createElement("li");
+    li.style.left = x + "px";
+    li.style.top = "390px";
+    li.innerHTML = ((lastPts - firstPts) / 90000) * 1000 + " ms";
+    pts.appendChild(li);
+  }
+}
+
+function printNUs(avcParser, nalUnits) {
   var elem = document.getElementById("nalUnits");
   elem.innerHTML = "";
 
@@ -57,7 +126,7 @@ function printNU(avcParser) {
       if (nu.pes) {
         pts = nu.pes.pts - firstPts;
       }
-      elem.innerHTML += "PTS:"+ pts + " " + avcParser.nalUnitType(nu.type) + " (" + nu.data.length + " bytes)\n";
+      elem.innerHTML += "PTS:"+ (pts / 90000) + " " + avcParser.nalUnitType(nu.type) + " (" + nu.data.length + " bytes)\n";
     });
   }
 }

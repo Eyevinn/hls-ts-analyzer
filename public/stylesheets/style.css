@@ -9,3 +9,23 @@ body {
 a {
   color: #00B7FF;
 }
+
+#nalUnits {
+  top: 480px;
+  width: 500px;
+  position: absolute;
+  font-size: 10px;
+}
+
+#units li {
+  list-style: none;
+  border: 1px solid;
+  position: absolute;
+}
+
+#pts li {
+  list-style: none;
+  position: absolute;
+  text-align: center;
+  font-size: 10px;
+}
